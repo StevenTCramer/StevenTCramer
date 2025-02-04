@@ -1,6 +1,6 @@
 ### Hi there 👋
 
-[![Discord](https://img.shields.io/discord/715274085940199487?logo=discord)](https://discord.gg/7F4bS2T)
+[![Discord](https://img.shields.io/discord/715274085940199487?logo=discord)](https://discord.gg/97tvbEr2AQ)
 [![Twitter](https://img.shields.io/twitter/follow/StevenTCramer.svg)](https://twitter.com/intent/follow?screen_name=StevenTCramer)
 
 ![TimeWarp Logo](https://raw.githubusercontent.com/TimeWarpEngineering/blazor-state/master/Assets/Logo.svg)
