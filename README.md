@@ -8,5 +8,5 @@
 
 ![Visitors since 2025-02-04](http://estruyf-github.azurewebsites.net/api/VisitorHit?user=steventcramer&repo=steventcramer&countColor=%237B1E7A)
 
-![TimeWarp Logo](https://raw.githubusercontent.com/TimeWarpEngineering/blazor-state/master/Assets/Logo.svg)
+![TimeWarp Logo](https://raw.githubusercontent.com/TimeWarpEngineering/timewarp-state/master/Assets/Logo.svg)
 
