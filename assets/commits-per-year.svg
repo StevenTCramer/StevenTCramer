@@ -42,8 +42,8 @@
 <rect x="697.0" y="169.6" width="46.3" height="108.4" rx="3" fill="#004F78"><title>2025: 5213 commits</title></rect>
 <text x="720.2" y="163.6" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#1F2D33">5,213</text>
 <text x="720.2" y="298" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#5B6B73">2025</text>
-<rect x="774.2" y="104.3" width="46.3" height="173.7" rx="3" fill="#00CCFF"><title>2026: 8353 commits</title></rect>
-<text x="797.4" y="98.3" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#1F2D33">8,353</text>
+<rect x="774.2" y="103.8" width="46.3" height="174.2" rx="3" fill="#00CCFF"><title>2026: 8376 commits</title></rect>
+<text x="797.4" y="97.8" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#1F2D33">8,376</text>
 <text x="797.4" y="298" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#5B6B73">2026 so far</text>
 <text x="24" y="324" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#5B6B73">Counts commits under this GitHub identity on public repos.  Updated 2026-10-23.</text>
 </svg>
