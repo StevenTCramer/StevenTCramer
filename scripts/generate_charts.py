@@ -2,7 +2,6 @@
 """Generate profile charts and the repo table from real public data.
 
 Writes:
-  assets/contributions.svg      contribution calendar, last 12 months
   assets/commits-per-year.svg   public commits per year
   README.md                     the repo table between the REPOS markers
 
@@ -30,7 +29,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOKEN = os.environ.get("GITHUB_TOKEN", "")
 FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
 
-LEVEL_COLORS = ["#E9EEF0", "#BFEFFF", "#66DDFF", "#00CCFF", "#004F78"]
 OCEAN, CYAN = "#004F78", "#00CCFF"
 INK, MUTED, BORDER = "#1F2D33", "#5B6B73", "#D8E2E6"
 
@@ -90,93 +88,6 @@ def api(path, ok_404=False):
 def clean(text):
     """Keep generated prose free of dash punctuation that reads badly."""
     return text.replace("\u2014", ",").replace("\u2013", "-").strip()
-
-
-# ---------------------------------------------------------------- contributions
-def fetch_contributions():
-    page = http("https://github.com/users/%s/contributions" % USER)
-    m = re.search(r"([\d,]+)\s*contributions\s*in the last year", page, re.S)
-    if not m:
-        raise DataError("could not read the contribution total from the page")
-    total = int(m.group(1).replace(",", ""))
-    counts = {}
-    for tip in re.finditer(r'<tool-tip[^>]*for="([^"]+)"[^>]*>([^<]*)</tool-tip>', page):
-        t = tip.group(2).strip()
-        n = re.match(r"(\d+) contributions? on", t)
-        counts[tip.group(1)] = int(n.group(1)) if n else 0
-    days = []
-    for td in re.finditer(r"<td\b[^>]*>", page):
-        tag = td.group(0)
-        d = re.search(r'data-date="(\d{4}-\d{2}-\d{2})"', tag)
-        if not d:
-            continue
-        lvl = re.search(r'data-level="(\d)"', tag)
-        ident = re.search(r'\bid="([^"]+)"', tag)
-        if not lvl or not ident:
-            raise DataError("day cell missing level or id")
-        days.append((dt.date.fromisoformat(d.group(1)), int(lvl.group(1)), counts.get(ident.group(1), 0)))
-    days.sort()
-    if not (360 <= len(days) <= 380):
-        raise DataError("unexpected number of days: %d" % len(days))
-    if len({d[0] for d in days}) != len(days):
-        raise DataError("duplicate days")
-    summed = sum(d[2] for d in days)
-    if summed == 0 or abs(summed - total) > max(50, total * 0.02):
-        raise DataError("day counts (%d) do not match header total (%d)" % (summed, total))
-    return total, days
-
-
-def contributions_svg(total, days, updated):
-    cell, gap = 12, 3
-    pitch = cell + gap
-    left, top = 40, 78
-    first = days[0][0]
-    start = first - dt.timedelta(days=(first.weekday() + 1) % 7)  # Sunday on or before
-    cols = ((days[-1][0] - start).days // 7) + 1
-    width = left + cols * pitch + 24
-    height = top + 7 * pitch + 62
-    out = []
-    a = out.append
-    a('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" role="img" aria-labelledby="t d">'
-      % (width, height, width, height))
-    a('<title id="t">Contributions, last 12 months</title>')
-    a('<desc id="d">Calendar of daily contributions over the last 12 months, %s in total.</desc>' % format(total, ","))
-    a('<rect x="0.5" y="0.5" width="%d" height="%d" rx="10" fill="#FFFFFF" stroke="%s"/>' % (width - 1, height - 1, BORDER))
-    a('<text x="24" y="34" font-family="%s" font-size="17" font-weight="600" fill="%s">Contributions, last 12 months</text>' % (FONT, INK))
-    a('<text x="%d" y="34" text-anchor="end" font-family="%s" font-size="13" fill="%s">%s contributions</text>'
-      % (width - 24, FONT, MUTED, format(total, ",")))
-    # month labels
-    last_month = None
-    for i in range(cols):
-        week_start = start + dt.timedelta(days=7 * i)
-        # label the column that holds the 1st-7th of a month
-        probe = week_start + dt.timedelta(days=6)
-        if probe.month != last_month and (probe.day <= 13 or last_month is None) and week_start >= first - dt.timedelta(days=6):
-            if last_month is not None or probe.day <= 13:
-                x = left + i * pitch
-                if x + 28 < width - 20:
-                    a('<text x="%d" y="%d" font-family="%s" font-size="11" fill="%s">%s</text>'
-                      % (x, top - 8, FONT, MUTED, probe.strftime("%b")))
-            last_month = probe.month
-    for row, name in ((1, "Mon"), (3, "Wed"), (5, "Fri")):
-        a('<text x="24" y="%d" text-anchor="end" font-family="%s" font-size="10" fill="%s">%s</text>'
-          % (top + row * pitch + 10, FONT, MUTED, name))
-    for day, lvl, n in days:
-        col = (day - start).days // 7
-        row = (day.weekday() + 1) % 7
-        a('<rect x="%d" y="%d" width="%d" height="%d" rx="2" fill="%s"><title>%d contributions on %s</title></rect>'
-          % (left + col * pitch, top + row * pitch, cell, cell, LEVEL_COLORS[lvl], n, day.isoformat()))
-    # legend
-    ly = top + 7 * pitch + 22
-    lx = width - 24 - (5 * pitch + 70 + 34)
-    a('<text x="%d" y="%d" font-family="%s" font-size="11" fill="%s">Less</text>' % (lx, ly + 10, FONT, MUTED))
-    for i, c in enumerate(LEVEL_COLORS):
-        a('<rect x="%d" y="%d" width="%d" height="%d" rx="2" fill="%s"/>' % (lx + 30 + i * pitch, ly, cell, cell, c))
-    a('<text x="%d" y="%d" font-family="%s" font-size="11" fill="%s">More</text>' % (lx + 30 + 5 * pitch + 4, ly + 10, FONT, MUTED))
-    a('<text x="24" y="%d" font-family="%s" font-size="11" fill="%s">Includes private work as anonymous counts.  Updated %s.</text>'
-      % (ly + 10, FONT, MUTED, updated))
-    a('</svg>')
-    return "\n".join(out) + "\n"
 
 
 # --------------------------------------------------------------------- commits
@@ -272,8 +183,6 @@ def repo_table(updated):
 def main():
     now = dt.datetime.now(dt.timezone.utc)
     updated = now.date().isoformat()
-    print("contributions...", file=sys.stderr)
-    total, days = fetch_contributions()
     print("commits per year...", file=sys.stderr)
     rows = fetch_commits_per_year(now.year)
     print("repo table...", file=sys.stderr)
@@ -288,7 +197,6 @@ def main():
     new_readme = pat.sub(lambda m: m.group(1) + table + "\n" + m.group(2), readme)
 
     outputs = {
-        os.path.join(ROOT, "assets", "contributions.svg"): contributions_svg(total, days, updated),
         os.path.join(ROOT, "assets", "commits-per-year.svg"): commits_svg(rows, now.year, updated),
         readme_path: new_readme,
     }
@@ -298,7 +206,6 @@ def main():
         with open(tmp, "w", encoding="utf-8", newline="\n") as f:
             f.write(content)
         os.replace(tmp, path)
-    print("contribution total: %d" % total, file=sys.stderr)
     print("commits per year: %r" % (rows,), file=sys.stderr)
 
 

@@ -35,10 +35,6 @@
 ## Activity
 
 <p align="center">
-  <img src="assets/contributions.svg" alt="Contribution calendar for the last 12 months, including private work as anonymous counts">
-</p>
-
-<p align="center">
   <img src="assets/commits-per-year.svg" alt="Bar chart of public commits per year">
 </p>
 
